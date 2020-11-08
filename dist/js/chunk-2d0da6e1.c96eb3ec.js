@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0da6e1"],{"6c20":function(e,n,t){"use strict";t.r(n);var s=function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("div",[t("h1",[e._v(e._s(e.msg))])])},a=[],c={name:"HelloWps",data:function(){return{msg:"欢迎来到wps加载项的世界!"}}},u=c,r=t("2877"),l=Object(r["a"])(u,s,a,!1,null,"43784e89",null);n["default"]=l.exports}}]);
+//# sourceMappingURL=chunk-2d0da6e1.c96eb3ec.js.map

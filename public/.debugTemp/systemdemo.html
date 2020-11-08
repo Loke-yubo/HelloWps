@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>业务系统模拟页面</title>
+    <script type="text/javascript" src="./wps_sdk.js"></script>
+</head>
+
+<body>
+    <div class="divTitle">XXX业务系统-前端模拟页面</div>
+    <div>
+        <div class="divItem">以下展示几个业务系统操作与wps加载项的交互：</div>
+        <div class="divItem">
+            <li><a href="#" onclick="openOfficeFile('http://我是文件的服务端地址')">打开业务系统文件</a></li>
+        </div>
+        <div class="divItem">
+            <li><a href="#" onclick="onDivClick('getDocumentName')">获取wps当前打开的文件的文件名</a></li>
+        </div>
+        <div class="divItem">
+            <li><a href="#" onclick="onDivClick('newDocument')">新建一个文件</a></li>
+        </div>
+    </div>
+
+    <div style="margin-top: 50px;">以下展示wps加载项主动发起的通知:</div>
+    <div>点击wps加载项发通知相关按钮，消息内容：<span style="font-weight: bolder;color: red;" id="webnotifyspan"></span></div>
+    <div class="divNote">
+        <hr>
+        <p>
+            更详细的与B/S业务系统集成的能力相关的示例，请参考：
+            <span style="font-weight: bolder;color: slateblue;"><a
+                    href="https://code.aliyun.com/zouyingfeng/wps/blob/master/README.md" target="_blank">
+                    https://code.aliyun.com/zouyingfeng/wps/blob/master/README.md
+                </a></span></p>
+        <p>
+            和我们一起构建WPS开发者社区，可以来<a href="https://zhuanlan.zhihu.com/c_1256350603921915904"
+                target="_blank">「WPS二次开发」</a>转转，留下您的评论。
+        </p>
+
+    </div>
+</body>
+<script>
+    var projInfo = {
+        name: "",
+        type: ""
+    }
+    window.onload = () => {
+        let getProjInfo = async (onGetProjInfo) => {
+            let xhr = WpsInvoke.CreateXHR()
+            xhr.onloadend = e => {
+                console.log(xhr)
+                onGetProjInfo(xhr.responseText)
+            }
+            xhr.open('GET', '/.debugTemp/ProjectInfo', true)
+            xhr.send()
+        }
+
+        getProjInfo((info) => {
+            projInfo = JSON.parse(info)
+            console.log(projInfo)
+            if (projInfo.type === "wps") {
+                projInfo.type = WpsInvoke.ClientType.wps
+            } else if (projInfo.type === "et") {
+                projInfo.type = WpsInvoke.ClientType.et
+            } else if (projInfo.type === "wpp") {
+                projInfo.type = WpsInvoke.ClientType.wpp
+            }
+
+            //下面这行代码用来注册从wps加载项返回的消息的接收函数
+            WpsInvoke.RegWebNotify(projInfo.type, projInfo.name, (messageText) => {
+                var span = document.getElementById("webnotifyspan")
+                span.innerHTML = messageText
+            })
+        })
+    }
+
+    //实际的开发中，业务系统与wps加载项的交互代码如下：
+    var callbackFunc = (result) => {
+        alert(JSON.stringify(result))
+    }
+
+    function openOfficeFile(param) {
+        let invokeParam = {
+            flag: "openOfficeFile",
+            filepath: param
+        } //根据需求任意定义
+        WpsInvoke.InvokeAsHttp(
+            projInfo
+            .type, //wps加载项的类型，有WpsInvoke.ClientType.wps，WpsInvoke.ClientType.et，WpsInvoke.ClientType.wpp3种类型
+            projInfo.name, //wps加载项的名字，在实际项目中写上对应的名字
+            "openOfficeFileFromSystemDemo", //要调用的在wps加载项中的函数名
+            JSON.stringify(invokeParam), //调用的在wps加载项中的函数要传递的数据，是一个json对象，根据业务系统需求任意定义
+            callbackFunc) //回调函数，wps加载项中InvokeFromSystemDemo这个函数的返回值作为这个函数的参数
+    }
+
+    function onDivClick(param) {
+        let invokeParam = {
+            按需求定义: "安需求给值",
+            Index: param,
+            AppType: projInfo.type,
+            自定义: {
+                xxx定义: "xxx值"
+            }
+        } //根据需求任意定义
+        WpsInvoke.InvokeAsHttp(
+            projInfo
+            .type, //wps加载项的类型，有WpsInvoke.ClientType.wps，WpsInvoke.ClientType.et，WpsInvoke.ClientType.wpp3种类型
+            projInfo.name, //wps加载项的名字，在实际项目中写上对应的名字
+            "InvokeFromSystemDemo", //要调用的在wps加载项中的函数名
+            JSON.stringify(invokeParam), //调用的在wps加载项中的函数要传递的数据，是一个json对象，根据业务系统需求任意定义
+            callbackFunc) //回调函数，wps加载项中InvokeFromSystemDemo这个函数的返回值作为这个函数的参数
+    }
+</script>
+<style>
+    .divTitle {
+        margin-top: 30px;
+        margin-bottom: 20px;
+        font-size: 40px;
+        font-weight: bolder;
+        text-align: center;
+    }
+
+    .divItem {
+        margin: 5px;
+    }
+
+    .divNote {
+        margin-top: 60px;
+    }
+</style>
+
+</html>
